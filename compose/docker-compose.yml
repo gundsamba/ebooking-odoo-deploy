@@ -1,0 +1,36 @@
+version: '2'
+services:
+  web:
+    # image: 192.168.1.94:5050/c002230/odoo:11.0
+    build: ./build
+    restart: always
+    depends_on:
+      - db
+    ports:
+      # limit access for reverse-proxy
+      # - "127.0.0.1:8011:8069"
+      - "8011:8069"
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./extra-addons:/mnt/extra-addons
+    # command: odoo --log-level=debug --no-database-list -d ebookingdb --dev=all
+    command: odoo --log-level=debug #--no-database-list -d edbookingdb
+  db:
+    image: postgres:9.4
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_USER=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data/pgdata
+volumes:
+  odoo-web-data:
+  odoo-db-data:
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 192.100.2.0/24
+
